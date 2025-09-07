@@ -18,17 +18,19 @@ function getRandomMessage() {
   return `${messages[randomIndex]} - ${timestamp}`;
 }
 
-// Create the server
 const server = http.createServer((req, res) => {
-  if (req.url === "/" && req.method === "GET") {
-    // Set the response header
-    res.writeHead(200, { "Content-Type": "text/plain" });
+  // Extract user information
+  const userIp = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+  const userAgent = req.headers["user-agent"] || "Unknown";
 
-    // Get a random message and send it as the response body
+  // Log the request to the console
+  console.log(`[REQUEST] IP: ${userIp} | User-Agent: ${userAgent}`);
+
+  if (req.url === "/" && req.method === "GET") {
+    res.writeHead(200, { "Content-Type": "text/plain" });
     const randomMessage = getRandomMessage();
     res.end(randomMessage);
   } else {
-    // Handle other requests with a 404 Not Found
     res.writeHead(404, { "Content-Type": "text/plain" });
     res.end("404 Not Found");
   }
@@ -36,7 +38,6 @@ const server = http.createServer((req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-// Start the server and listen on the specified port
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
